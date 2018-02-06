@@ -137,3 +137,36 @@ class Refresh(Resource):
             raise e
         except:
             auth_ns.abort(401, 'Unknown token error')
+
+
+# required_token decorator
+def token_required(f):
+    def wrapper(*args, **kwargs):
+        auth_header = request.headers.get('Authorization')
+        if auth_header:
+            try:
+                access_token = auth_header.split(' ')[1]
+
+                try:
+                    jwt.decode(access_token, current_app.config['SECRET_KEY'])
+                except jwt.ExpiredSignatureError as e:
+                    raise e
+                except (jwt.DecodeError, jwt.InvalidTokenError) as e:
+                    raise e
+                except:
+                    auth_ns.abort(401, 'Unknown token error')
+
+            except IndexError:
+                raise jwt.InvalidTokenError
+        else:
+            auth_ns.abort(403, 'Token required')
+        return f(*args, **kwargs)
+    return wrapper
+
+
+# This resource only for test
+@auth_ns.route('/protected')
+class Protected(Resource):
+    @token_required
+    def get(self):
+        return {'i am': 'protected'}

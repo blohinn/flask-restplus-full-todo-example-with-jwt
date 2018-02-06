@@ -3,3 +3,4 @@ __pycache__/
 venv/
 db_dev.db
 db_test.db
+sandbox.py

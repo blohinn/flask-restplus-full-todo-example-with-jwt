@@ -20,6 +20,7 @@ class DevelopmentConfig(Config):
 class TestingConfig(Config):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'db_test.db')
+    #SECRET_KEY = 'testing'
     # SQLALCHEMY_DATABASE_URI = 'sqlite://'
     # SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, tempfile.mktemp(dir='.', suffix='.db'))
     # tempfile.mktemp(dir=basedir, suffix='.db')
