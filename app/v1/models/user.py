@@ -1,7 +1,7 @@
 from flask_restplus import fields
 from sqlalchemy.orm import relationship
 from werkzeug.security import generate_password_hash
-from ..resources.user import user_ns
+from app.v1 import v1_api
 from app import db
 
 
@@ -22,6 +22,6 @@ class User(db.Model):
     def password(self, password):
         self.password_hash = generate_password_hash(password)
 
-    user_resource_model = user_ns.model('User', {
+    user_resource_model = v1_api.model('User', {
         'username': fields.String(required=True)
     })

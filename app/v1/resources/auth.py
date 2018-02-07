@@ -12,12 +12,12 @@ import hashlib
 
 auth_ns = Namespace('auth')
 
-register_model = auth_ns.model('Register', {
+register_model = v1_api.model('Register', {
     'username': fields.String(required=True),
     'password': fields.String(required=True)
 })
 
-return_token_model = auth_ns.model('ReturnToken', {
+return_token_model = v1_api.model('ReturnToken', {
     'access_token': fields.String(required=True),
     'refresh_token': fields.String(required=True)
 })
@@ -101,7 +101,7 @@ class Login(Resource):
 
 @auth_ns.route('/refresh')
 class Refresh(Resource):
-    @auth_ns.expect(auth_ns.model('RefreshToken', {'refresh_token': fields.String(required=True)}), validate=True)
+    @auth_ns.expect(v1_api.model('RefreshToken', {'refresh_token': fields.String(required=True)}), validate=True)
     @auth_ns.response(200, 'Success', return_token_model)
     def post(self):
         _refresh_token = v1_api.payload['refresh_token']
@@ -139,33 +139,7 @@ class Refresh(Resource):
             auth_ns.abort(401, 'Unknown token error')
 
 
-# required_token decorator
-def token_required(f):
-    def wrapper(*args, **kwargs):
-        auth_header = request.headers.get('Authorization')
-        current_user = None
-        if auth_header:
-            try:
-                access_token = auth_header.split(' ')[1]
-
-                try:
-                    token = jwt.decode(access_token, current_app.config['SECRET_KEY'])
-                    current_user = User.query.get(token['uid'])
-                except jwt.ExpiredSignatureError as e:
-                    raise e
-                except (jwt.DecodeError, jwt.InvalidTokenError) as e:
-                    raise e
-                except:
-                    auth_ns.abort(401, 'Unknown token error')
-
-            except IndexError:
-                raise jwt.InvalidTokenError
-        else:
-            auth_ns.abort(403, 'Token required')
-        return f(*args, current_user, **kwargs)
-    wrapper.__doc__ = f.__doc__
-    wrapper.__name__ = f.__name__
-    return wrapper
+from ..utils import token_required
 
 
 # This resource only for test
@@ -173,4 +147,4 @@ def token_required(f):
 class Protected(Resource):
     @token_required
     def get(self, current_user):
-        return {'i am': 'protected', 'uid': 1}
+        return {'i am': 'protected', 'uid': current_user.id}
