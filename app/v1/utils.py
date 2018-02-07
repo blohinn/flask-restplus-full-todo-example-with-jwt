@@ -27,7 +27,7 @@ def token_required(f):
                 raise jwt.InvalidTokenError
         else:
             v1_api.abort(403, 'Token required')
-        return f(*args, current_user, **kwargs)
+        return f(*args, **kwargs, current_user=current_user)
 
     wrapper.__doc__ = f.__doc__
     wrapper.__name__ = f.__name__
