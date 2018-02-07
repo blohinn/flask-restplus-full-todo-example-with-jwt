@@ -10,7 +10,9 @@ class User(db.Model):
     username = db.Column(db.String(50))
     password_hash = db.Column(db.String(80))
     from .auth import RefreshToken
-    refresh_tokens = relationship('RefreshToken', uselist=False, backref='user')
+    refresh_tokens = relationship('RefreshToken', backref='user')
+    from .todo import Todo
+    todos = relationship('Todo', backref='user')
 
     @property
     def password(self):
